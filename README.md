@@ -35,6 +35,12 @@ Or 🔗 [check the installation instructions](INSTALL.md).
 
 A skill for your coding assistant that stops it from burying the answer. Action first. Steps numbered. No "Hope this helps!"
 
+## Community launch kit
+
+Want to share this with ADHD and neurodivergent communities?
+
+- Soft-launch messaging + channel plan: [`launch/adhd-community-soft-launch.md`](launch/adhd-community-soft-launch.md)
+- Reply tracking template: [`launch/reply-tracker.csv`](launch/reply-tracker.csv)
 
 ## What changes
 
