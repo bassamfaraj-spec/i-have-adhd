@@ -33,6 +33,7 @@ class EvaluationHarnessTest(unittest.TestCase):
         self.assertEqual({("direct-answer", 1, "baseline", "claude")}, run_evals.completed_keys(valid))
         for field, value in (
             ("trial", True),
+            ("trial", 1.5),
             ("trial", 0),
             ("trial", -1),
             ("condition", ""),
@@ -43,14 +44,23 @@ class EvaluationHarnessTest(unittest.TestCase):
                 invalid[field] = value
                 self.assertEqual(set(), run_evals.completed_keys([invalid]))
 
-        malformed_case = {
-            "id": "probe",
-            "category": "   ",
-            "prompt": "   ",
-            "risk": "low",
-            "criteria": ["   "],
-        }
-        errors = run_evals.validate_cases([malformed_case])
+        malformed_cases = [
+            {
+                "id": "probe",
+                "category": "   ",
+                "prompt": "   ",
+                "risk": "low",
+                "criteria": ["   "],
+            },
+            {
+                "id": "probe-non-string-criteria",
+                "category": "direct-answer",
+                "prompt": "Valid prompt",
+                "risk": "low",
+                "criteria": [1],
+            },
+        ]
+        errors = run_evals.validate_cases(malformed_cases)
         self.assertTrue(any("category must be a non-empty string" in item for item in errors))
         self.assertTrue(any("prompt must be a non-empty string" in item for item in errors))
         self.assertTrue(any("criteria entries must be non-empty strings" in item for item in errors))
