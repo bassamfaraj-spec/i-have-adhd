@@ -63,7 +63,10 @@ class EvaluationHarnessTest(unittest.TestCase):
         errors = run_evals.validate_cases(malformed_cases)
         self.assertTrue(any("category must be a non-empty string" in item for item in errors))
         self.assertTrue(any("prompt must be a non-empty string" in item for item in errors))
-        self.assertTrue(any("criteria entries must be non-empty strings" in item for item in errors))
+        for criteria in (["   "], [None]):
+            with self.subTest(criteria=criteria):
+                errors = run_evals.validate_cases([dict(malformed_case, criteria=criteria)])
+                self.assertTrue(any("criteria entries must be non-empty strings" in item for item in errors))
 
     def test_parse_response_tolerates_output_after_the_json_document(self):
         """The CLI can emit a notice after its JSON result; the first document still wins."""
