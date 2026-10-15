@@ -68,10 +68,14 @@ def completed_keys(rows: list[dict[str, Any]]) -> set[tuple[str, int, str, str]]
     keys: set[tuple[str, int, str, str]] = set()
     for row in rows:
         fields = (row.get("case_id"), row.get("trial"), row.get("condition"), row.get("runner"))
-        if isinstance(fields[0], str) and isinstance(fields[1], int) and all(
-            isinstance(value, str) for value in fields[2:]
+        trial = fields[1]
+        if (
+            isinstance(fields[0], str)
+            and type(trial) is int
+            and trial > 0
+            and all(isinstance(value, str) and value for value in fields[2:])
         ):
-            keys.add(fields)  # type: ignore[arg-type]
+            keys.add((fields[0], trial, fields[2], fields[3]))
     return keys
 
 
@@ -91,10 +95,16 @@ def validate_cases(cases: list[dict[str, Any]]) -> list[str]:
             errors.append(f"Duplicate case id: {case_id}")
         else:
             seen.add(case_id)
+        if not isinstance(case["category"], str) or not case["category"].strip():
+            errors.append(f"Case {case_id}: category must be a non-empty string")
+        if not isinstance(case["prompt"], str) or not case["prompt"].strip():
+            errors.append(f"Case {case_id}: prompt must be a non-empty string")
         if case["risk"] not in {"low", "medium", "high"}:
             errors.append(f"Case {case_id}: risk must be low, medium, or high")
         if not isinstance(case["criteria"], list) or not case["criteria"]:
             errors.append(f"Case {case_id}: criteria must be a non-empty list")
+        elif any(not isinstance(item, str) or not item.strip() for item in case["criteria"]):
+            errors.append(f"Case {case_id}: criteria entries must be non-empty strings")
     return errors
 
 

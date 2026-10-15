@@ -23,6 +23,32 @@ class EvaluationHarnessTest(unittest.TestCase):
         self.assertGreaterEqual(len(cases), 12)
         self.assertGreaterEqual(len({case["category"] for case in cases}), 8)
 
+    def test_invalid_trial_values_are_rejected_when_resuming_runs(self):
+        valid = [{
+            "case_id": "direct-answer",
+            "trial": 1,
+            "condition": "baseline",
+            "runner": "claude",
+        }]
+        bad = [{
+            "case_id": "direct-answer",
+            "trial": True,
+            "condition": "baseline",
+            "runner": "claude",
+        }]
+
+        self.assertEqual({("direct-answer", 1, "baseline", "claude")}, run_evals.completed_keys(valid))
+        self.assertEqual(set(), run_evals.completed_keys(bad))
+
+        malformed_case = {
+            "id": "probe",
+            "category": "direct-answer",
+            "prompt": "   ",
+            "risk": "low",
+            "criteria": ["Answer concisely."],
+        }
+        errors = run_evals.validate_cases([malformed_case])
+        self.assertTrue(any("prompt must be a non-empty string" in item for item in errors))
 
     def test_parse_response_tolerates_output_after_the_json_document(self):
         """The CLI can emit a notice after its JSON result; the first document still wins."""
